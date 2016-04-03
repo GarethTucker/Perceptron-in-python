@@ -6,7 +6,15 @@ class Main (object):
         with open (perceptron_file) as f:
             lines = f.readlines()
             line_number = 0;
+            self.instance_classes = []
             while line_number < len(lines):
+                if lines[line_number].startswith('#'):
+                    instance_class = lines[line_number]
+                    if instance_class.startswith('#Yes'):
+                        instance_class = 1
+                    else:
+                        instance_class = 0
+                    self.instance_classes.append(instance_class)
                 if len(lines[line_number]) > 10:
                     line = lines[line_number].rstrip() + lines[line_number+1].rstrip()
                     start_break_point = 0
