@@ -12,14 +12,29 @@ class Classify (object):
         # print('FEATURE VALUES')
         # for feature_value in feature_values:
         #     print(feature_value)
-        self.LEARNING_RATE = 0.025
+        self.LEARNING_RATE = 100
+        MAX_RUNS = 1000
         weights = self.initialise_weights(0.0, 0.5)
-        # print('WEIGHTS')
-        # print(weights)
-        print('feature_values len: %d'%len(feature_values))
-        print('images len: %d'%len(images))
-        for index in range(0, len(images)):
-            weights = self.perceptron(weights, images, feature_values[index], instance_classes[index])
+        print('Starting Weights: ')
+        twodecimals = ["%.2f" % v for v in weights]
+        print(", ".join(twodecimals))
+        # print('feature_values len: %d'%len(feature_values))
+        # print('images len: %d'%len(images))
+        self.perceptron_call = 0
+        perceptron_correct = False
+        runs = 0
+        while perceptron_correct == False and runs < MAX_RUNS:
+            perceptron_correct = self.perceptron(weights, images, feature_values, instance_classes)
+            runs += 1
+        if perceptron_correct:
+            print('Perceptron is classifying all images correctly')
+            print('It took %d runs'%runs)
+        else:
+            print("Perceptron did not correctly classify all images correctly within MAX_RUNS limit")
+            print('Ran %d times'%MAX_RUNS)
+        print('Final Weights: ')
+        twodecimals = ["%.2f" % v for v in weights]
+        print(", ".join(twodecimals))
 
     def construct_features(self):
         features = []
@@ -63,31 +78,54 @@ class Classify (object):
         return weights
 
     def get_sum_of_features_times_weights(self, weights, feature_values):
+        # print('feature_values in sum method')
+        # print(feature_values)
         sum = 0.0
         for index in range (0, len(weights)):
             weight = weights[index]
+            # print('weight: %f'%weight)
             feature_value = feature_values[index]
+            # print('feature_value: %d'%feature_value)
             weighted_feature = float(weight*feature_value)
             sum += weighted_feature
+        # print('sum: %f'%sum)
         return sum
 
     def perceptron(self, weights, images, feature_values, instance_classes):
-        print('weights: ')
-        print(weights)
-        print('weights length: %d'%len(weights))
-        print('feature values:')
-        print(feature_values)
-        print('feature_values length: %d'%len(feature_values))
-        print('instance_class: %d'%instance_classes)
-        for image in images:
-            for row in image:
-                print(row)
-            for instance in feature_values:
-                sum_of_features_times_weights = self.get_sum_of_features_times_weights(weights, feature_values)
+        self.perceptron_call += 1
+        # print('perceptron_call: %d'%self.perceptron_call)
+        # print('weights: ')
+        # print(weights)
+        # print('weights length: %d'%len(weights))
+        # print('feature values:')
+        # print(feature_values)
+        # print('feature_values length: %d'%len(feature_values))
+        # print('instance_class: ')
+        # print(instance_classes)
+        all_images_correctly_classified = True
+        for image_index in range(0, len(images)):
+            # for row in images[index]:
+            #     print(row)
+            features = feature_values[image_index]
+            sum_of_features_times_weights = self.get_sum_of_features_times_weights(weights, features)
 
-                print('sum_of_features_times_weights : %f'%sum_of_features_times_weights )
-                if instance_classes > 0 and sum_of_features_times_weights <= 0:
-                    print('ADJUST WEIGHTS UP')
-                if instance_classes == 0 and sum_of_features_times_weights > 0:
-                    print('ADJUST WEIGHTS DOWN')
-
+            # print('sum_of_features_times_weights : %f'%sum_of_features_times_weights )
+            # print('instance_class: %d'%instance_classes[image_index])
+            if instance_classes[image_index] > 0 and sum_of_features_times_weights <= 0:
+                # print('positive instance classified as negative, increasing weights')
+                for weight_index in range(0, len(weights)):
+                    weight = weights[weight_index]
+                    feature = features[weight_index]
+                    new_weight = weight + (feature*self.LEARNING_RATE)
+                    weights[weight_index] = new_weight
+                    all_images_correctly_classified = False
+            if instance_classes[image_index] < 0 and sum_of_features_times_weights > 0:
+                # print('negative instance classified as positive, lowering weights')
+                for weight_index in range(0, len(weights)):
+                    weight = weights[weight_index]
+                    feature = features[weight_index]
+                    new_weight = weight - (feature*self.LEARNING_RATE)
+                    weights[weight_index] = new_weight
+                    all_images_correctly_classified = False
+            # print('\n')
+        return all_images_correctly_classified

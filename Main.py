@@ -13,7 +13,7 @@ class Main (object):
                     if instance_class.startswith('#Yes'):
                         instance_class = 1
                     else:
-                        instance_class = 0
+                        instance_class = -1
                     self.instance_classes.append(instance_class)
                 if len(lines[line_number]) > 10:
                     line = lines[line_number].rstrip() + lines[line_number+1].rstrip()
