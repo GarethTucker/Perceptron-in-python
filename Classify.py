@@ -16,7 +16,10 @@ class Classify (object):
         weights = self.initialise_weights(0.0, 0.5)
         # print('WEIGHTS')
         # print(weights)
-        weights = self.perceptron(weights, images, feature_values[0], instance_classes[0])
+        print('feature_values len: %d'%len(feature_values))
+        print('images len: %d'%len(images))
+        for index in range(0, len(images)):
+            weights = self.perceptron(weights, images, feature_values[index], instance_classes[index])
 
     def construct_features(self):
         features = []
@@ -76,10 +79,15 @@ class Classify (object):
         print(feature_values)
         print('feature_values length: %d'%len(feature_values))
         print('instance_class: %d'%instance_classes)
-        image = images[0]
-        for row in image:
-            print(row)
-        sum_of_features_times_weights = self.get_sum_of_features_times_weights(weights, feature_values)
+        for image in images:
+            for row in image:
+                print(row)
+            for instance in feature_values:
+                sum_of_features_times_weights = self.get_sum_of_features_times_weights(weights, feature_values)
 
-        print('sum_of_features_times_weights : %f'%sum_of_features_times_weights )
+                print('sum_of_features_times_weights : %f'%sum_of_features_times_weights )
+                if instance_classes > 0 and sum_of_features_times_weights <= 0:
+                    print('ADJUST WEIGHTS UP')
+                if instance_classes == 0 and sum_of_features_times_weights > 0:
+                    print('ADJUST WEIGHTS DOWN')
 
